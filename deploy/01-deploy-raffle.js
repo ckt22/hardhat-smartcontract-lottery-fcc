@@ -14,17 +14,19 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const chainId = network.config.chainId
     let vrfCoordinatorV2Address, subscriptionId
 
-    if (chainId == 31337) {
+    if (chainId == 31337) { // localhost
         // create VRFV2 Subscription
         const vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock")
         vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address
         const transactionResponse = await vrfCoordinatorV2Mock.createSubscription()
         const transactionReceipt = await transactionResponse.wait()
+        // use case of events - get the value so you can use it for other functions
         subscriptionId = transactionReceipt.events[0].args.subId
         // Fund the subscription
         // Our mock makes it so we don't actually have to worry about sending fund
         await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, FUND_AMOUNT)
     } else {
+        // testnet / mainnet case
         vrfCoordinatorV2Address = networkConfig[chainId]["vrfCoordinatorV2"]
         subscriptionId = networkConfig[chainId]["subscriptionId"]
     }
